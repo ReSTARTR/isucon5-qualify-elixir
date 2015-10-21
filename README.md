@@ -1,19 +1,44 @@
-# Isucon5q
+# ISUCON 5 Qualify Application written in Elixir/Phoenix.
 
-To start your Phoenix app:
+ref: [https://github.com/isucon/isucon5-qualify](https://github.com/isucon/isucon5-qualify)
 
-  1. Install dependencies with `mix deps.get`
-  2. Create and migrate your database with `mix ecto.create && mix ecto.migrate`
-  3. Start Phoenix endpoint with `mix phoenix.server`
+## NOTE
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+* THIS REPOSITORY NOW IN DEVELOPMENT
+* BENCHMARK SCRIPT WILL PASS, BUT CODE IS NOT OPTIMIZED
 
-Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
+## Verification Environment
 
-## Learn more
+* Ubuntu 15.04
+* Elixir: 1.1.0
+* Phoenix: 1.0.1
+* Node.js: 0.10.25
+* MySQL: 5.6.25
 
-  * Official website: http://www.phoenixframework.org/
-  * Guides: http://phoenixframework.org/docs/overview
-  * Docs: http://hexdocs.pm/phoenix
-  * Mailing list: http://groups.google.com/group/phoenix-talk
-  * Source: https://github.com/phoenixframework/phoenix
+## Setup
+
+* Elixir: [http://elixir-lang.org/install.html#unix-and-unix-like](http://elixir-lang.org/install.html#unix-and-unix-like)
+* Phoenix: [http://www.phoenixframework.org/docs/installation](http://www.phoenixframework.org/docs/installation)
+
+Requirements:
+
+```
+# ubuntu
+sudo apt-get install erlang-dev
+```
+
+erlang source is required from [timex](https://github.com/bitwalker/timex)
+
+### initialize repository(*NOT REQUIRED*)
+
+```bash
+mix phoenix.new --database mysql --app isucon5q ../isucon5-qualify-elixir
+```
+
+### initialize app
+
+```bash
+mix deps.get
+npm install
+mix phoenx.server
+```
