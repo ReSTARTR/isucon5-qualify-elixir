@@ -126,7 +126,6 @@ defmodule Isucon5q.PageController do
     user = User.get_by(user_id: user_id)
     entry = Entry.get_by(entry_id: entry_id)
     owner = User.get_by(user_id: entry.user_id)
-    IO.inspect(["private?", entry.private, "friend?", Relation.friendship(user.id, owner.id)])
 
     if entry.private && !Relation.friendship(user.id, owner.id) do
       conn
