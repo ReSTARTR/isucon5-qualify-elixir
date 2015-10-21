@@ -1,4 +1,6 @@
 exports.config = {
+  sourceMaps: false,
+
   // See http://brunch.io/#documentation for docs.
   files: {
     javascripts: {
@@ -21,8 +23,10 @@ exports.config = {
       // }
     },
     stylesheets: {
-      joinTo: "css/app.css",
-      joinTo: "css/bootstrap.min.css"
+      joinTo: {
+        "css/app.min.css": /css\/app\.css/,
+        "css/bootstrap.min.css": /css\/bootstrap\.min\.css/
+      },
     },
     templates: {
       joinTo: "js/app.js"
