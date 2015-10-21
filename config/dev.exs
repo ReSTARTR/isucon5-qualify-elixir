@@ -15,18 +15,19 @@ config :isucon5q, Isucon5q.Endpoint,
   watchers: [node: ["node_modules/brunch/bin/brunch", "watch", "--stdin"]]
 
 # Watch static and templates for browser reloading.
-config :isucon5q, Isucon5q.Endpoint,
-  live_reload: [
-    url: "ws://localhost:8080",
-    patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
-      ~r{web/views/.*(ex)$},
-      ~r{web/templates/.*(eex)$}
-    ]
-  ]
+# config :isucon5q, Isucon5q.Endpoint,
+#   live_reload: [
+#     url: "ws://localhost:8080",
+#     patterns: [
+#       ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
+#       ~r{web/views/.*(ex)$},
+#       ~r{web/templates/.*(eex)$}
+#     ]
+#   ]
 
 # Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
+config :logger, :console, level: :debug, format: "[$level] $message\n"
+# config :logger, :console, level: :info, format: "[$level] $message\n"
 
 # Set a higher stacktrace during development.
 # Do not configure such in production as keeping
@@ -38,6 +39,6 @@ config :isucon5q, Isucon5q.Repo,
   adapter: Ecto.Adapters.MySQL,
   username: "root",
   password: "",
-  database: "isucon5q_dev",
+  database: "isucon5q",
   hostname: "localhost",
   pool_size: 10

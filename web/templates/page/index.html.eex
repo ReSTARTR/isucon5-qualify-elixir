@@ -1,36 +1,92 @@
-<div class="jumbotron">
-  <h2>Welcome to Phoenix!</h2>
-  <p class="lead">A productive web framework that<br />does not compromise speed and maintainability.</p>
-</div>
+<h2>ISUxi index</h2>
 
-<div class="row marketing">
-  <div class="col-lg-6">
-    <h4>Resources</h4>
-    <ul>
-      <li>
-        <a href="http://phoenixframework.org/docs/overview">Guides</a>
-      </li>
-      <li>
-        <a href="http://hexdocs.pm/phoenix">Docs</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
-      </li>
-    </ul>
+<div class="row panel panel-primary" id="prof">
+  <div class="col-md-12 panel-title" id="prof-nickname"><%= @user.nick_name %></div>
+  <div class="col-md-12"><a href="/profile/<%= @user.account_name %>">プロフィール</a></div>
+  <div class="col-md-4">
+      <dt>アカウント名</dt><dd id="prof-account-name"><%= @user.account_name %></dd>
+      <dt>メールアドレス</dt><dd id="prof-email"><%= @user.email %></dd>
+      <dt>姓</dt><dd id="prof-last-name"><%= @profile.last_name || "未入力" %></dd>
+      <dt>名</dt><dd id="prof-first-name"><%= @profile.first_name || "未入力" %></dd>
+      <dt>性別</dt><dd id="prof-sex"><%= @profile.sex || "未入力" %></dd>
+      <dt>誕生日</dt><dd id="prof-birthday"><%= @profile.birthday || "未入力" %></dd>
+      <dt>住んでいる県</dt><dd id="prof-pref"><%= @profile.pref || "未入力" %></dd>
+      <dt>友だちの人数</dt><dd id="prof-friends"><a href="/friends"><%= length(@friends) %>人</a></dd>
+    </dl>
   </div>
 
-  <div class="col-lg-6">
-    <h4>Help</h4>
-    <ul>
-      <li>
-        <a href="http://groups.google.com/group/phoenix-talk">Mailing list</a>
-      </li>
-      <li>
-        <a href="http://webchat.freenode.net/?channels=elixir-lang">#elixir-lang on freenode IRC</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">@elixirphoenix</a>
-      </li>
-    </ul>
+  <div class="col-md-4">
+    <div id="entries-title"><a href="/diary/entries/<%= @user.account_name %>">あなたの日記エントリ</a></div>
+    <div id="entries">
+      <ul class="list-group">
+        <%= for entry <- @entries do %>
+        <li class="list-group-item entries-entry"><a href="/diary/entry/<%= entry.id %>"><%= entry_title(entry) %></a></li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div><a href="/footprints">あなたのページへの足あと</a></div>
+    <div id="footprints">
+      <ul class="list-group">
+        <%= for footprint <- @footprints do %>
+          <% foot_user = user(footprint.user_id) %>
+          <li class="list-group-item footprints-footprint"><%= footprint.created_at %>: <a href="/profile/<%= foot_user.account_name %>"><%= foot_user.nick_name %>さん</a></li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="row panel panel-primary">
+  <div class="col-md-4">
+    <div>あなたへのコメント</div>
+    <div id="comments">
+      <%= for comment <- @comments do %>
+      <div class="comments-comment">
+        <ul class="list-group">
+          <% comment_user = user(comment.user_id) %>
+          <li class="list-group-item comment-owner"><a href="/profile/<%= comment_user.account_name %>"><%= comment_user.account_name %>さん</a>:</li>
+          <li class="list-group-item comment-comment"><%= comment_digest(comment.comment) %></li>
+          <li class="list-group-item comment-created-at">投稿時刻:<%= comment.created_at %></li>
+        </ul>
+      </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div>あなたの友だちの日記エントリ</div>
+    <div id="friend-entries">
+      <%= for entry <- @friend_entries do %>
+      <div class="friend-entry">
+        <ul class="list-group">
+          <% entry_owner = user(entry.user_id) %>
+          <li class="list-group-item entry-owner"><a href="/diary/entries/<%= entry_owner.account_name %>"><%= entry_owner.nick_name %>さん</a>:</li>
+          <li class="list-group-item entry-title"><a href="/diary/entry/<%= entry.id %>"><%= entry_title(entry) %></a></li>
+          <li class="list-group-item entry-created-at">投稿時刻:<%= entry.created_at %></li>
+        </ul>
+      </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div>あなたの友だちのコメント</div>
+    <div id="friend-comments">
+      <%= for comment <- @friend_comments do %>
+      <div class="friend-comment">
+        <ul class="list-group">
+          <% comment_owner = user(comment.user_id) %>
+          <% comment_entry = entry(comment.entry_id) %>
+          <% entry_owner = user(comment_entry.user_id) %>
+          <li class="list-group-item comment-from-to"><a href="/profile/<%= comment_owner.account_name %>"><%= comment_owner.nick_name %>さん</a>から<a href="/profile/<%= entry_owner.account_name %>"><%= entry_owner.nick_name %>さん</a>へのコメント:</li>
+          <li class="list-group-item comment-comment"><%= comment_digest(comment.comment) %></li>
+          <li class="list-group-item comment-created-at">投稿時刻:<%= comment.created_at %></li>
+        </ul>
+      </div>
+      <% end %>
+    </div>
   </div>
 </div>

@@ -33,7 +33,8 @@ defmodule Isucon5q.Endpoint do
   plug Plug.Session,
     store: :cookie,
     key: "_isucon5q_key",
-    signing_salt: "CM/8qQ3H"
+    signing_salt: System.get_env("ISUCON_SESSION_SECRET") || "beermoris"
+    # signing_salt: "CM/8qQ3H"
 
   plug Isucon5q.Router
 end

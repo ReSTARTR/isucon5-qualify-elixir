@@ -15,6 +15,15 @@ ref: [https://github.com/isucon/isucon5-qualify](https://github.com/isucon/isuco
 * Elixir: [http://elixir-lang.org/install.html#unix-and-unix-like](http://elixir-lang.org/install.html#unix-and-unix-like)
 * Phoenix: [http://www.phoenixframework.org/docs/installation](http://www.phoenixframework.org/docs/installation)
 
+Requirements:
+
+```
+# ubuntu
+sudo apt-get install erlang-dev
+```
+
+erlang source is required from [timex](https://github.com/bitwalker/timex)
+
 ### initialize repository(not required)
 
 ```bash

@@ -1,0 +1,70 @@
+<h2><%= @owner.nick_name %>さんのプロフィール</h2>
+
+<div class="row" id="prof">
+  <dl class="panel panel-primary">
+    <dt>アカウント名</dt><dd id="prof-account-name"><%= @owner.account_name %></dd>
+    <%= if @permitted do %>
+    <dt>メールアドレス</dt><dd id="prof-email"><%= @owner.email %></dd>
+    <% end %>
+    <dt>姓</dt><dd id="prof-last-name"><%= @profile.last_name || "未入力" %></dd>
+    <dt>名</dt><dd id="prof-first-name"><%= @profile.first_name || "未入力" %></dd>
+    <%= if @permitted do %>
+    <dt>性別</dt><dd id="prof-sex"><%= @profile.sex || "未入力" %></dd>
+    <dt>誕生日</dt><dd id="prof-birthday"><%= @profile.birthday || "未入力" %></dd>
+    <dt>住んでいる県</dt><dd id="prof-pref"><%= @profile.pref || "未入力" %></dd>
+    <% end %>
+  </dl>
+</div>
+
+<h2><%= @owner.nick_name %>さんの日記</h2>
+<div class="row" id="prof-entries">
+  <%= for entry <- @entries do %>
+  <%= if @permitted || !entry.private do %>
+  <div class="panel panel-primary entry">
+    <div class="entry-title">タイトル: <a href="/diary/entry/<%= entry.id %>"><%= entry_title(entry) %></a></div>
+    <div class="entry-content">
+      <%= entry_content(entry) |> String.slice(0..60) |> String.split("\n") |> Enum.map(fn(s) -> s <> "<br />" end) |> raw %>
+    </div>
+    <div class="entry-created-at">更新日時: <%= entry.created_at %></div>
+  </div>
+  <% end %>
+  <% end %>
+</div>
+
+<%= if @user.id == @owner.id do %>
+<h2>プロフィール更新</h2>
+<div id="profile-post-form">
+  <form method="POST" action="/profile/<%= user(@profile.user_id).account_name %>">
+    <div>名字: <input type="text" name="last_name" placeholder="みょうじ" value="<%= @profile.last_name %>" /></div>
+    <div>名前: <input type="text" name="first_name" placeholder="なまえ" value="<%= @profile.first_name %>" /></div>
+    <div>性別:
+      <select name="sex">
+        <option>未指定</option>
+        <option <%= if @profile.sex == "男性"   do %>selected<% end %>>男性</option>
+        <option <%= if @profile.sex == "女性"   do %>selected<% end %>>女性</option>
+        <option <%= if @profile.sex == "その他" do %>selected<% end %>>その他</option>
+      </select>
+    </div>
+    <div>誕生日:
+      <input type="date" name="birthday" min="1915-01-01" max="2014-12-31" value="<%= @profile.birthday %>">
+    </div>
+    <div>住んでいる県:
+      <select name="pref">
+        <%= for pref <- prefs do %>
+        <option <%= if @profile.pref == pref do %>selected<% end %>><%= pref %></option>
+        <% end %>
+      </select>
+    </div>
+    <div><input type="submit" value="更新" /></div>
+  </div>
+</div>
+<% else %>
+  <%= if !friend?(@user.id, @owner.id) do %>
+  <h2>あなたは友だちではありません</h2>
+  <div id="profile-friend-form">
+    <form method="POST" action="/friends/<%= @owner.account_name %>">
+      <input type="submit" value="このユーザと友だちになる" />
+    </form>
+  </div>
+  <% end %>
+<% end %>
