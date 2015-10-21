@@ -41,4 +41,6 @@ mix phoenix.new --database mysql --app isucon5q ../isucon5-qualify-elixir
 mix deps.get
 npm install
 mix phoenx.server
+# or
+MIX_ENV=prod mix phoenix.server
 ```

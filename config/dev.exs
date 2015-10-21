@@ -26,8 +26,8 @@ config :isucon5q, Isucon5q.Endpoint,
 #   ]
 
 # Do not include metadata nor timestamps in development logs
-config :logger, :console, level: :debug, format: "[$level] $message\n"
-# config :logger, :console, level: :info, format: "[$level] $message\n"
+# config :logger, :console, level: :debug, format: "[$level] $message\n"
+config :logger, :console, level: :info, format: "[$level] $message\n"
 
 # Set a higher stacktrace during development.
 # Do not configure such in production as keeping
