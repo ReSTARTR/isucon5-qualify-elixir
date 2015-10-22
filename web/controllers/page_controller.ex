@@ -98,10 +98,10 @@ defmodule Isucon5q.PageController do
     owner = User.get_by(account_name: account_name)
     changeset = Relation.changeset(%Relation{}, %{ "one" => owner.id, "another" => user.id})
     case Repo.insert(changeset) do
-      {:ok, model} ->
+      {:ok, _model} ->
         changeset = Relation.changeset(%Relation{}, %{ "one" => user.id, "another" => owner.id})
         case Repo.insert(changeset) do
-          {:ok, model} -> redirect conn, to: "/friends"
+          {:ok, _model} -> redirect conn, to: "/friends"
           {:error, changeset} -> text conn, List.join(changeset.errors)
         end
       {:error, changeset} ->
@@ -150,7 +150,7 @@ defmodule Isucon5q.PageController do
 
     case Repo.insert(changeset) do
       # TODO: status see other
-      {:ok, model} -> redirect conn, to: "/diary/entry/" <> entry_id
+      {:ok, _model} -> redirect conn, to: "/diary/entry/" <> entry_id
       # TODO: error page
       {:error, changeset} -> text(conn, List.join(changeset.errors))
     end
@@ -162,7 +162,7 @@ defmodule Isucon5q.PageController do
     changeset = Entry.changeset(%Entry{}, Map.merge(params, %{ "user_id" => user.id }))
 
     case Repo.insert(changeset) do
-      {:ok, model} -> redirect conn, to: "/diary/entries/" <> user.account_name
+      {:ok, _model} -> redirect conn, to: "/diary/entries/" <> user.account_name
       {:error, changeset} -> text(conn, List.join(changeset.errors)) # TODO: error status
     end
   end
@@ -195,7 +195,7 @@ defmodule Isucon5q.PageController do
 
     q = from p in Profile, where: p.user_id == ^user.id
 
-    {cnt, _} = Repo.update_all(q, [set: [
+    {_cnt, _} = Repo.update_all(q, [set: [
       first_name: params["first_name"],
       last_name:  params["last_name"],
       birthday:   params["birthday"],
