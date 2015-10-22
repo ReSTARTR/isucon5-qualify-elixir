@@ -1,6 +1,8 @@
 defmodule Isucon5q.PageControllerTest do
   use Isucon5q.ConnCase
-  use ExUnit.Case, async: true
+
+  # Document:
+  #   http://hexdocs.pm/phoenix/Phoenix.ConnTest.html
 
   setup_all do
     :ok # do nothing
@@ -12,9 +14,6 @@ defmodule Isucon5q.PageControllerTest do
     end
     :ok
   end
-
-  # Document:
-  #   http://hexdocs.pm/phoenix/Phoenix.ConnTest.html
 
   test "GET /initialize" do
     conn = get conn(), "/initialize"
