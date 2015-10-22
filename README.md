@@ -44,3 +44,9 @@ mix phoenx.server
 # or
 MIX_ENV=prod mix phoenix.server
 ```
+
+## run test cases
+
+```bash
+mix test --trace --cover
+```
