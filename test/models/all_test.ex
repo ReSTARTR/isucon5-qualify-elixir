@@ -11,6 +11,14 @@ defmodule Isucon5q.RelationTest do
     cs = Relation.changeset(%Relation{}, %{})
     assert cs.valid? == false
   end
+
+  test "friendship" do
+    cs = Relation.changeset(%Relation{}, %{ "one" => 2, "another" => 99 })
+    Isucon5q.Repo.insert(cs)
+
+    assert ! Relation.friendship(1, 2)
+    assert Relation.friendship(2, 99)
+  end
 end
 
 defmodule Isucon5q.EntryTest do

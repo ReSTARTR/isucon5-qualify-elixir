@@ -51,11 +51,13 @@ defmodule Isucon5q.Relation do
     |> cast(params, ~w{one another}, ~w{})
   end
 
+  # SELECT COUNT(1) AS cnt FROM relations WHERE (one = ? AND another = ?) OR (one = ? AND another = ?)
   def friendship(one, another) do
-    # TODO: use Ecto.Query (Cann't cascade where clause?)
-    sql = "SELECT COUNT(1) AS cnt FROM relations WHERE (one = ? AND another = ?) OR (one = ? AND another = ?)"
-    {:ok, result} = Ecto.Adapters.SQL.query(Isucon5q.Repo, sql, [one, another, another, one])
-    (result.rows |> List.first |> List.first) > 0
+    from(r in Isucon5q.Relation,
+      where: (r.one == ^one and r.another == ^another) or (r.one == ^another and r.another == ^one),
+      order_by: [desc: :created_at],
+      select: count(r.id))
+    |> Isucon5q.Repo.one > 0
   end
 
   # SELECT * FROM relations WHERE one = ? OR another = ? ORDER BY created_at DESC
