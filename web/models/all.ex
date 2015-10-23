@@ -202,19 +202,13 @@ defmodule Isucon5q.Entry do
   # non-friend:
   #   SELECT * FROM entries WHERE user_id = ? AND private=0 ORDER BY created_at DESC LIMIT 20
   def recent_by(limit \\ 10, user_id: user_id, permitted: permitted) do
-    case permitted do
-      true ->
-        q = from e in Isucon5q.Entry,
-            where: e.user_id == ^user_id,
-            order_by: [desc: :created_at],
-            limit: ^limit,
-            select: e
-      false ->
-        q = from e in Isucon5q.Entry,
-            where: e.user_id == ^user_id and e.private == false,
-            order_by: [desc: :created_at],
-            limit: ^limit,
-            select: e
+    q = from e in Isucon5q.Entry,
+      where: e.user_id == ^user_id,
+      order_by: [desc: :created_at],
+      limit: ^limit,
+      select: e
+    if ! permitted do
+       q = Ecto.Query.where(q, [e], e.private == false)
     end
     Isucon5q.Repo.all(q)
   end

@@ -40,6 +40,21 @@ defmodule Isucon5q.EntryTest do
     params = %{}
     assert ! Entry.changeset(%Entry{}, params).valid?
   end
+
+  test "recent_by" do
+    cs1 = Entry.changeset(%Entry{}, %{"user_id" => 9, "private" => "on", "content" => "hello"})
+    cs2 = Entry.changeset(%Entry{}, %{"user_id" => 9, "private" => nil, "content" => "hello"})
+    Isucon5q.Repo.insert(cs1)
+    Isucon5q.Repo.insert(cs2)
+
+    entries = Entry.recent_by(10, user_id: 9, permitted: false)
+    assert !(entries |> Enum.any?(fn(e) -> e.private end))
+    assert entries |> Enum.all?(fn(e) -> !e.private end)
+
+    entries = Entry.recent_by(10, user_id: 9, permitted: true)
+    assert entries |> Enum.any?(fn(e) -> e.private end)
+    assert entries |> Enum.any?(fn(e) -> !e.private end)
+  end
 end
 
 defmodule Isucon5q.ProfileTest do
