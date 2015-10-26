@@ -176,8 +176,6 @@ defmodule Isucon5q.PageController do
       birthday:   params["birthday"],
       sex:        params["sex"],
       pref:       params["pref"],
-      # TODO: with timezone / use callbacks
-      updated_at: :os.timestamp |> :calendar.now_to_datetime,
     ]])
 
     redirect conn, to: "/profile/" <> user.account_name
