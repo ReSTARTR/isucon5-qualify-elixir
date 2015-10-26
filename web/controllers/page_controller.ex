@@ -11,37 +11,22 @@ defmodule Isucon5q.PageController do
   alias Isucon5q.Relation
   alias Isucon5q.Footprint
 
-  defp render_index(conn) do
-    user_id = get_session(conn, :user_id)
-
-    user            = User.get_by(user_id: user_id)
-    profile         = Profile.get_by(user_id: user_id)
-    entries         = Entry.recent_by(5, user_id: user_id, permitted: true)
-    footprints      = Footprint.recent_by(owner_id: user_id, limit: 10)
-    comments        = Comment.recent_by(user_id: user_id)
-    friend_entries  = Entry.user_friends(user_id: user_id)
-    friend_comments = Comment.user_friends(user_id: user_id)
-    friends         = Relation.friends(user_id: user_id)
-
-    render conn, "index.html",
-      user: user,
-      profile: profile,
-      entries: entries,
-      footprints: footprints,
-      comments: comments,
-      friend_entries: friend_entries,
-      friend_comments: friend_comments,
-      friends: friends
+  defp current_user(conn) do
+    User.get_by(user_id: get_session(conn, :user_id))
   end
 
   def index(conn, _params) do
-    user_id = get_session(conn, :user_id)
+    user = current_user(conn)
 
-    if user_id == nil do
-      redirect conn, to: "/login"
-    else
-      render_index(conn)
-    end
+    render conn, "index.html",
+      user: user,
+      profile: Profile.get_by(user_id: user.id),
+      entries: Entry.recent_by(5, user_id: user.id, permitted: true),
+      footprints: Footprint.recent_by(owner_id: user.id, limit: 10),
+      comments: Comment.recent_by(user_id: user.id),
+      friend_entries: Entry.user_friends(user_id: user.id),
+      friend_comments: Comment.user_friends(user_id: user.id),
+      friends: Relation.friends(user_id: user.id)
   end
 
   def login(conn, _params) do
@@ -67,8 +52,7 @@ defmodule Isucon5q.PageController do
   end
 
   def profile(conn, %{ "account_name" => account_name }) do
-    user_id = get_session(conn, :user_id)
-    user      = User.get_by(user_id: user_id)
+    user      = current_user(conn)
     owner     = User.get_by(account_name: account_name)
     profile   = Profile.get_by(user_id: owner.id)
     permitted = user.id == owner.id || Relation.friendship(user.id, owner.id)
@@ -85,15 +69,13 @@ defmodule Isucon5q.PageController do
   end
 
   def friends(conn, _params) do
-    user_id = get_session(conn, :user_id)
-    user = User.get_by(user_id: user_id)
-    friends = Relation.friends(user_id: user_id)
+    user = current_user(conn)
+    friends = Relation.friends(user_id: user.id)
     render conn, "friends.html", user: user, friends: friends
   end
 
   def friends_post(conn, %{ "account_name" => account_name }) do
-    user_id = get_session(conn, :user_id)
-    user = User.get_by(user_id: user_id)
+    user = current_user(conn)
     owner = User.get_by(account_name: account_name)
 
     case Repo.transaction(fn ->
@@ -108,8 +90,7 @@ defmodule Isucon5q.PageController do
   end
 
   def diary_entries(conn, %{ "account_name" => account_name }) do
-    user_id = get_session(conn, :user_id)
-    user = User.get_by(user_id: user_id)
+    user = current_user(conn)
     owner = User.get_by(account_name: account_name)
     permitted = user.id == owner.id || Relation.friendship(user.id, owner.id)
     entries = Entry.recent_by(user_id: owner.id, permitted: permitted)
@@ -120,8 +101,7 @@ defmodule Isucon5q.PageController do
   end
 
   def diary_entry(conn, %{ "entry_id" => entry_id }) do
-    user_id = get_session(conn, :user_id)
-    user = User.get_by(user_id: user_id)
+    user = current_user(conn)
     entry = Entry.get_by(entry_id: entry_id)
     owner = User.get_by(user_id: entry.user_id)
 
@@ -143,8 +123,8 @@ defmodule Isucon5q.PageController do
   end
 
   def diary_comment_post(conn, %{ "entry_id" => entry_id, "comment" => comment }) do
-    user_id = get_session(conn, :user_id)
-    changeset = Comment.changeset(%Comment{}, %{ "entry_id" => entry_id, "user_id" => user_id, "comment" => comment })
+    user = current_user(conn)
+    changeset = Comment.changeset(%Comment{}, %{ "entry_id" => entry_id, "user_id" => user.id, "comment" => comment })
 
     case Repo.insert(changeset) do
       # TODO: status see other
@@ -155,8 +135,7 @@ defmodule Isucon5q.PageController do
   end
 
   def diary_entry_post(conn, params) do
-    user_id = get_session(conn, :user_id)
-    user = User.get_by(user_id: user_id)
+    user = current_user(conn)
     changeset = Entry.changeset(%Entry{}, Map.merge(params, %{ "user_id" => user.id }))
 
     case Repo.insert(changeset) do
@@ -166,8 +145,7 @@ defmodule Isucon5q.PageController do
   end
 
   def footprints(conn, _params) do
-    user_id = get_session(conn, :user_id)
-    user = User.get_by(user_id: user_id)
+    user = current_user(conn)
     footprints = Footprint.recent_by(owner_id: user.id, limit: 50)
 
     render conn, "footprints.html", footprints: footprints
@@ -188,8 +166,7 @@ defmodule Isucon5q.PageController do
   end
 
   def profile_update(conn, params) do
-    user_id = get_session(conn, :user_id)
-    user = User.get_by(user_id: user_id)
+    user = current_user(conn)
 
     q = from p in Profile, where: p.user_id == ^user.id
 
