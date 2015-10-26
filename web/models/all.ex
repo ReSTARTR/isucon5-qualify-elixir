@@ -19,21 +19,14 @@ defmodule Isucon5q.User do
   end
 
   def auth(email, password) do
-    sql = "SELECT u.id AS id, u.account_name AS account_name, u.nick_name AS nick_name, u.email AS email
-FROM users u
-JOIN salts s ON u.id = s.user_id
-WHERE u.email = ? AND u.passhash = SHA2(CONCAT(?, s.salt), 512)"
+    # NOTE: "due to its complexity, such style is discouraged."
+    #   ref: http://hexdocs.pm/ecto/Ecto.Query.html
+    q = from u in Isucon5q.User,
+      join: s in Isucon5q.Salt, on: u.id == s.user_id,
+      where: u.email == ^email and u.passhash == fragment("SHA2(CONCAT(?, salt), 512)", ^password),
+      select: u
 
-    case Ecto.Adapters.SQL.query(Isucon5q.Repo, sql, [email, password]) do
-      {:ok, %{num_rows: 0}} -> nil
-      {:ok, result} -> result.rows |> Enum.map(&(from_list(result.columns, &1))) |> List.first
-      _ -> nil
-    end
-  end
-
-  def from_list(columns, r) do
-    fields = Enum.reduce(Enum.zip(columns, r), %{}, fn({key, value}, map) -> Map.put(map, key, value) end)
-    Ecto.Schema.__load__(Isucon5q.User, nil, nil, [], fields, &Isucon5q.Repo.__adapter__.load/2)
+    q |> Isucon5q.Repo.one
   end
 end
 

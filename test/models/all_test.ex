@@ -1,3 +1,32 @@
+defmodule Isucon5q.UserTest do
+  use Isucon5q.ModelCase
+  alias Isucon5q.User
+  alias Isucon5q.Salt
+
+  setup do
+    password = "test"
+    salt = "abcdef"
+
+    user = %User{email: "test@isucon.net", account_name: "test", nick_name: "test", passhash: "18bf8ccec498d8a2df9e7a0eb9d4e8d6776eb04d4384777272ff36319799f5420ac749ab5bdd31279bff9206fbfd2fe414a6cc3e7823d8cb353152d513f277ce"} |> Repo.insert!
+    _salt = %Salt{salt: salt, user_id: user.id} |> Repo.insert!
+
+    # passhash = from(u in User, join: s in Salt, on: u.id == s.user_id, where: u.email == "test@isucon.net", select: fragment("SHA2(CONCAT('test', salt), 512)")) |> Repo.one
+
+    {:ok, email: user.email, password: password}
+  end
+
+  test "auth with valid account", %{email: email, password: password} do
+    user = User.auth(email, password)
+    assert user != nil
+    assert user.nick_name == "test"
+  end
+
+  test "auth with invalid account", %{email: email, password: password} do
+    user = User.auth(email, "invalid-" <> password)
+    assert user == nil
+  end
+end
+
 defmodule Isucon5q.RelationTest do
   use Isucon5q.ModelCase
   alias Isucon5q.Relation
