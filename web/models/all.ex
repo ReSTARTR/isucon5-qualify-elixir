@@ -241,17 +241,20 @@ defmodule Isucon5q.Comment do
     Isucon5q.Repo.all(q)
   end
 
+  # SELECT c.id AS id, c.entry_id AS entry_id, c.user_id AS user_id, c.comment AS comment, c.created_at AS created_at
+  # FROM comments c
+  # JOIN entries e ON c.entry_id = e.id
+  # WHERE e.user_id = ?
+  # ORDER BY c.created_at DESC
+  # LIMIT 10
   def recent_by(user_id: user_id) do
-    {:ok, result} = Ecto.Adapters.SQL.query(Isucon5q.Repo,
-      "SELECT c.id AS id, c.entry_id AS entry_id, c.user_id AS user_id, c.comment AS comment, c.created_at AS created_at
-      FROM comments c
-      JOIN entries e ON c.entry_id = e.id
-      WHERE e.user_id = ?
-      ORDER BY c.created_at DESC
-      LIMIT 10", [user_id])
-    %{columns: columns, num_rows: num_rows, rows: rows} = result
-
-    rows |> Enum.map(&(from_list(columns, &1)))
+    from(c in Isucon5q.Comment,
+      join: e in Isucon5q.Entry,
+      on: c.entry_id == e.id,
+      where: e.user_id == ^user_id,
+      order_by: [desc: :created_at],
+      limit: 10)
+    |> Isucon5q.Repo.all
   end
 
   def user_friends(user_id: user_id) do
@@ -259,11 +262,6 @@ defmodule Isucon5q.Comment do
     |> Isucon5q.Repo.all
     |> Isucon5q.Repo.filter_while(fn (c) -> Isucon5q.Relation.friendship(user_id, c.user_id) end, 10)
     |> Enum.to_list
-  end
-
-  def from_list(columns, r) do
-    fields = Enum.reduce(Enum.zip(columns, r), %{}, fn({key, value}, map) -> Map.put(map, key, value) end)
-    Ecto.Schema.__load__(Isucon5q.Comment, nil, nil, [], fields, &Isucon5q.Repo.__adapter__.load/2)
   end
 
   def count_by(entry_id: entry_id) do
