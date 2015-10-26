@@ -95,16 +95,15 @@ defmodule Isucon5q.PageController do
     user_id = get_session(conn, :user_id)
     user = User.get_by(user_id: user_id)
     owner = User.get_by(account_name: account_name)
-    changeset = Relation.changeset(%Relation{}, %{ "one" => owner.id, "another" => user.id})
-    case Repo.insert(changeset) do
-      {:ok, _model} ->
-        changeset = Relation.changeset(%Relation{}, %{ "one" => user.id, "another" => owner.id})
-        case Repo.insert(changeset) do
-          {:ok, _model} -> redirect conn, to: "/friends"
-          {:error, changeset} -> text conn, List.join(changeset.errors)
-        end
-      {:error, changeset} ->
-        text conn, List.join(changeset.errors)
+
+    case Repo.transaction(fn ->
+      Relation.changeset(%Relation{}, %{ "one" => owner.id, "another" => user.id}) |> Repo.insert!
+      Relation.changeset(%Relation{}, %{ "one" => user.id, "another" => owner.id}) |> Repo.insert!
+    end) do
+      {:ok, _} ->
+        redirect conn, to: "/friends"
+      {:error, _} ->
+        text conn, "Failed to insert relationships" # TODO:
     end
   end
 
