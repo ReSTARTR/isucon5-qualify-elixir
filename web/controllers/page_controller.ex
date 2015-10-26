@@ -52,10 +52,9 @@ defmodule Isucon5q.PageController do
     user = User.auth(email, password)
     case user do
       nil ->
-        render conn, "login.html",
-          message: "ログインに失敗しました",
-          email: email,
-          password: password
+        conn
+        |> put_status(400)
+        |> render("login.html", message: "ログインに失敗しました", email: email, password: password)
       _ ->
         conn = put_session(conn, :user_id, user.id)
         redirect conn, to: "/"
