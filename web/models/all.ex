@@ -218,9 +218,11 @@ defmodule Isucon5q.Entry do
 
   # SELECT * FROM entries ORDER BY created_at DESC LIMIT 1000
   def user_friends(user_id: user_id) do
+    friend_ids = Isucon5q.Relation.friends(user_id: user_id)
+
     from(e in Isucon5q.Entry, order_by: [desc: :created_at], limit: 1000)
     |> Isucon5q.Repo.all
-    |> Isucon5q.Repo.filter_while(fn (e) -> Isucon5q.Relation.friendship(user_id, e.user_id) end, 10)
+    |> Isucon5q.Repo.filter_while(fn e -> user_id == e.user_id || Enum.member?(friend_ids, e.user_id) end, 10) # TODO: Is graph directed or undirected?
     |> Enum.to_list
   end
 end
@@ -270,9 +272,11 @@ defmodule Isucon5q.Comment do
   end
 
   def user_friends(user_id: user_id) do
+    friend_ids = Isucon5q.Relation.friends(user_id: user_id)
+
     from(c in Isucon5q.Comment, order_by: [desc: :created_at], limit: 1000)
     |> Isucon5q.Repo.all
-    |> Isucon5q.Repo.filter_while(fn (c) -> Isucon5q.Relation.friendship(user_id, c.user_id) end, 10)
+    |> Isucon5q.Repo.filter_while(fn (c) -> user_id == c.user_id || Enum.member?(friend_ids, c.user_id) end, 10)
     |> Enum.to_list
   end
 
