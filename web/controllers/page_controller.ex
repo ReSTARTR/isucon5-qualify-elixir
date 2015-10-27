@@ -21,11 +21,11 @@ defmodule Isucon5q.PageController do
     render conn, "index.html",
       user: user,
       profile: Profile.get_by(user_id: user.id),
-      entries: Entry.recent_by(5, user_id: user.id, permitted: true),
-      footprints: Footprint.recent_by(owner_id: user.id, limit: 10),
-      comments: Comment.recent_by(user_id: user.id),
-      friend_entries: Entry.user_friends(user_id: user.id),
-      friend_comments: Comment.user_friends(user_id: user.id),
+      entries: Entry.recent_by(5, user_id: user.id, permitted: true) |> Repo.preload([:user]),
+      footprints: Footprint.recent_by(owner_id: user.id, limit: 10) |> Repo.preload([:user]),
+      comments: Comment.recent_by(user_id: user.id) |> Repo.preload([:user, :entry]),
+      friend_entries: Entry.user_friends(user_id: user.id) |> Repo.preload([:user]),
+      friend_comments: Comment.user_friends(user_id: user.id) |> Repo.preload([:user, :entry_user]),
       friends: Relation.friends(user_id: user.id)
   end
 
