@@ -70,7 +70,8 @@ defmodule Isucon5q.PageController do
 
   def friends(conn, _params) do
     user = current_user(conn)
-    friends = Relation.friends(user_id: user.id)
+    friend_ids = Relation.friends(user_id: user.id)
+    friends = Ecto.Query.from(u in User, where: u.id in ^friend_ids) |> Repo.all
     render conn, "friends.html", user: user, friends: friends
   end
 
