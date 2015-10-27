@@ -220,10 +220,16 @@ defmodule Isucon5q.Entry do
   def user_friends(user_id: user_id) do
     friend_ids = Isucon5q.Relation.friends(user_id: user_id)
 
-    from(e in Isucon5q.Entry, order_by: [desc: :created_at], limit: 1000)
+    # NOTE:
+    #   Because an entry body size is too large,
+    #   prefetch entry.id and entry.user_id that has already been filtered with permission.
+    ids = from(e in Isucon5q.Entry, order_by: [desc: :created_at], limit: 1000, select: [e.id, e.user_id])
+      |> Isucon5q.Repo.all
+      |> Enum.filter(fn [_, uid] -> user_id == uid || Enum.member?(friend_ids, uid) end) # TODO: Is graph directed or undirected?
+      |> Enum.map(fn [id, _] -> id end)
+
+    from(e in Isucon5q.Entry, where: e.id in ^ids, order_by: [desc: :created_at])
     |> Isucon5q.Repo.all
-    |> Isucon5q.Repo.filter_while(fn e -> user_id == e.user_id || Enum.member?(friend_ids, e.user_id) end, 10) # TODO: Is graph directed or undirected?
-    |> Enum.to_list
   end
 end
 
@@ -274,10 +280,13 @@ defmodule Isucon5q.Comment do
   def user_friends(user_id: user_id) do
     friend_ids = Isucon5q.Relation.friends(user_id: user_id)
 
-    from(c in Isucon5q.Comment, order_by: [desc: :created_at], limit: 1000)
+    ids = from(c in Isucon5q.Comment, order_by: [desc: :created_at], limit: 1000, select: [c.id, c.user_id])
+      |> Isucon5q.Repo.all
+      |> Enum.filter(fn [_, uid] -> user_id == uid || Enum.member?(friend_ids, uid) end)
+      |> Enum.map(fn [id, _] -> id end)
+
+    from(c in Isucon5q.Comment, where: c.id in ^ids, order_by: [desc: :created_at])
     |> Isucon5q.Repo.all
-    |> Isucon5q.Repo.filter_while(fn (c) -> user_id == c.user_id || Enum.member?(friend_ids, c.user_id) end, 10)
-    |> Enum.to_list
   end
 
   def count_by(entry_id: entry_id) do
