@@ -105,7 +105,7 @@ defmodule Isucon5q.PageController do
     user = current_user(conn)
     entry = Entry.get_by(entry_id: entry_id) |> Repo.preload([:user, :comments, :comment_user])
 
-    if entry.private && !Relation.friendship(user.id, entry.user.id) do
+    if user.id != entry.user.id && entry.private && !Relation.friendship(user.id, entry.user.id) do
       conn
       |> put_status(403)
       |> text("Forbidden")
