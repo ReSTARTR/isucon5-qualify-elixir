@@ -142,7 +142,7 @@ defmodule Isucon5q.PageController do
 
   def footprints(conn, _params) do
     user = current_user(conn)
-    footprints = Footprint.recent_by(owner_id: user.id, limit: 50)
+    footprints = Footprint.recent_by(owner_id: user.id, limit: 50) |> Repo.preload([:user])
 
     render conn, "footprints.html", footprints: footprints
   end
