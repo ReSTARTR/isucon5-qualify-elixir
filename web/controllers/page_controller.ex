@@ -94,7 +94,7 @@ defmodule Isucon5q.PageController do
     user = current_user(conn)
     owner = User.get_by(account_name: account_name)
     permitted = user.id == owner.id || Relation.friendship(user.id, owner.id)
-    entries = Entry.recent_by(user_id: owner.id, permitted: permitted)
+    entries = Entry.recent_by(user_id: owner.id, permitted: permitted) |> Repo.preload([:comments])
 
     {:ok, _} = Footprint.mark(from: user.id, to: owner.id)
 
