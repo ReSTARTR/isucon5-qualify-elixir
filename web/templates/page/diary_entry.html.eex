@@ -1,4 +1,4 @@
-<h2><%= @owner.nick_name %>さんの日記</h2>
+<h2><%= @entry.user.nick_name %>さんの日記</h2>
 <div class="row panel panel-primary" id="entry-entry">
     <div class="entry-title">タイトル: <a href="/diary/entry/<%= @entry.id %>"><%= entry_title(@entry) %></a></div>
     <div class="entry-content">
@@ -9,10 +9,9 @@
 </div>
 <h3>この日記へのコメント</h3>
 <div class="row panel panel-primary" id="entry-comments">
-  <%= for comment <- @comments do %>
+  <%= for comment <- @entry.comments do %>
     <div class="comment">
-      <% comment_user = user(comment.user_id) %>
-      <div class="comment-owner"><a href="/profile/<%= comment_user.account_name %>"><%= comment_user.nick_name %>さん</a></div>
+      <div class="comment-owner"><a href="/profile/<%= comment.user.account_name %>"><%= comment.user.nick_name %>さん</a></div>
       <div class="comment-comment">
         <%= comment.comment |> String.split("\n") |> Enum.map(fn(s) -> s <> "<br />" end) |> raw %>
       </div>

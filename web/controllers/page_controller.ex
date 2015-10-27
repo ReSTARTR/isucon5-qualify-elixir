@@ -103,23 +103,18 @@ defmodule Isucon5q.PageController do
 
   def diary_entry(conn, %{ "entry_id" => entry_id }) do
     user = current_user(conn)
-    entry = Entry.get_by(entry_id: entry_id)
-    owner = User.get_by(user_id: entry.user_id)
+    entry = Entry.get_by(entry_id: entry_id) |> Repo.preload([:user, :comments, :comment_user])
 
-    if entry.private && !Relation.friendship(user.id, owner.id) do
+    if entry.private && !Relation.friendship(user.id, entry.user.id) do
       conn
       |> put_status(403)
       |> text("Forbidden")
     else
-      comments = Comment.get_by(entry_id: entry_id)
-
-      {:ok, _} = Footprint.mark(from: user.id, to: owner.id)
+      {:ok, _} = Footprint.mark(from: user.id, to: entry.user.id)
 
       render conn, "diary_entry.html",
         user: user,
-        owner: owner,
-        entry: entry,
-        comments: comments
+        entry: entry
     end
   end
 

@@ -182,6 +182,7 @@ defmodule Isucon5q.Entry do
 
     belongs_to :user, Isucon5q.User, foreign_key: :user_id, define_field: false
     has_many :comments, Isucon5q.Comment
+    has_many :comment_user, through: [:comments, :user]
   end
 
   def changeset(model, params \\ :empty) do
