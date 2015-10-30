@@ -6,13 +6,24 @@ defmodule Isucon5q.UserTest do
   setup do
     password = "test"
     salt = "abcdef"
+    passhash = User.gen_passhash(password, salt)
 
-    user = %User{email: "test@isucon.net", account_name: "test", nick_name: "test", passhash: "18bf8ccec498d8a2df9e7a0eb9d4e8d6776eb04d4384777272ff36319799f5420ac749ab5bdd31279bff9206fbfd2fe414a6cc3e7823d8cb353152d513f277ce"} |> Repo.insert!
+    user = %User{email: "test@isucon.net", account_name: "test", nick_name: "test", passhash: passhash} |> Repo.insert!
     _salt = %Salt{salt: salt, user_id: user.id} |> Repo.insert!
 
     # passhash = from(u in User, join: s in Salt, on: u.id == s.user_id, where: u.email == "test@isucon.net", select: fragment("SHA2(CONCAT('test', salt), 512)")) |> Repo.one
 
     {:ok, email: user.email, password: password}
+  end
+
+  test "gen_passhash should return a valid string.", _context do
+    hash1 = User.gen_passhash("testA", "abcdef")
+    assert String.length(hash1) == 128
+
+    hash2 = User.gen_passhash("testB", "abcdef")
+    assert String.length(hash1) == 128
+
+    assert hash1 != hash2
   end
 
   test "auth with valid account", %{email: email, password: password} do
