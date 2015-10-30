@@ -21,11 +21,11 @@ defmodule Isucon5q.PageController do
     render conn, "index.html",
       user: user,
       profile: Profile.get_by(user_id: user.id),
-      entries: Entry.recent_by(5, user_id: user.id, permitted: true) |> Repo.preload([:user]),
-      footprints: Footprint.recent_by(owner_id: user.id, limit: 10) |> Repo.preload([:user]),
-      comments: Comment.recent_by(user_id: user.id) |> Repo.preload([:user, :entry]),
-      friend_entries: Entry.user_friends(user_id: user.id) |> Repo.preload([:user]),
-      friend_comments: Comment.user_friends(user_id: user.id) |> Repo.preload([:user, :entry_user]),
+      entries: Entry.recent_by(5, user_id: user.id, permitted: true),
+      footprints: Footprint.recent_by(owner_id: user.id, limit: 10),
+      comments: Comment.recent_by(user_id: user.id),
+      friend_entries: Entry.user_friends(user_id: user.id),
+      friend_comments: Comment.user_friends(user_id: user.id),
       friends: Relation.friends(user_id: user.id)
   end
 
@@ -70,8 +70,7 @@ defmodule Isucon5q.PageController do
 
   def friends(conn, _params) do
     user = current_user(conn)
-    friend_ids = Relation.friends(user_id: user.id)
-    friends = Ecto.Query.from(u in User, where: u.id in ^friend_ids) |> Repo.all
+    friends = Relation.friends(user_id: user.id)
     render conn, "friends.html", user: user, friends: friends
   end
 
@@ -94,7 +93,7 @@ defmodule Isucon5q.PageController do
     user = current_user(conn)
     owner = User.get_by(account_name: account_name)
     permitted = user.id == owner.id || Relation.friendship(user.id, owner.id)
-    entries = Entry.recent_by(user_id: owner.id, permitted: permitted) |> Repo.preload([:comments])
+    entries = Entry.recent_by(user_id: owner.id, permitted: permitted)
 
     {:ok, _} = Footprint.mark(from: user.id, to: owner.id)
 
@@ -103,18 +102,23 @@ defmodule Isucon5q.PageController do
 
   def diary_entry(conn, %{ "entry_id" => entry_id }) do
     user = current_user(conn)
-    entry = Entry.get_by(entry_id: entry_id) |> Repo.preload([:user, :comments, :comment_user])
+    entry = Entry.get_by(entry_id: entry_id)
+    owner = User.get_by(user_id: entry.user_id)
 
-    if user.id != entry.user.id && entry.private && !Relation.friendship(user.id, entry.user.id) do
+    if entry.private && !Relation.friendship(user.id, owner.id) do
       conn
       |> put_status(403)
       |> text("Forbidden")
     else
-      {:ok, _} = Footprint.mark(from: user.id, to: entry.user.id)
+      comments = Comment.get_by(entry_id: entry_id)
+
+      {:ok, _} = Footprint.mark(from: user.id, to: owner.id)
 
       render conn, "diary_entry.html",
         user: user,
-        entry: entry
+        owner: owner,
+        entry: entry,
+        comments: comments
     end
   end
 
@@ -142,7 +146,7 @@ defmodule Isucon5q.PageController do
 
   def footprints(conn, _params) do
     user = current_user(conn)
-    footprints = Footprint.recent_by(owner_id: user.id, limit: 50) |> Repo.preload([:user])
+    footprints = Footprint.recent_by(owner_id: user.id, limit: 50)
 
     render conn, "footprints.html", footprints: footprints
   end

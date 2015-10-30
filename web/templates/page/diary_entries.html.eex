@@ -31,7 +31,7 @@
     </div>
     <%= if entry.private do %><div class="text-danger entry-private">範囲: 友だち限定公開</div><% end %>
     <div class="entry-created-at">更新日時: <%= entry.created_at %></div>
-    <div class="entry-comments">コメント: <%= length(entry.comments) %>件</div>
+    <div class="entry-comments">コメント: <%= num_comments(entry.id) %>件</div>
   </div>
   <% end %>
 </div>

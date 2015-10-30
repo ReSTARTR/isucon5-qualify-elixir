@@ -2,7 +2,8 @@
 <div class="row panel panel-primary" id="footprints">
   <ul class="list-group">
     <%= for footprint <- @footprints do %>
-    <li class="list-group-item footprints-footprint"><%= footprint.updated_at %>: <a href="/profile/<%= footprint.user.account_name %>"><%= footprint.user.nick_name %>さん</a></li>
+    <% user = user(footprint.user_id) %>
+    <li class="list-group-item footprints-footprint"><%= footprint.updated_at %>: <a href="/profile/<%= user.account_name %>"><%= user.nick_name %>さん</a></li>
     <% end %>
     </ul>
 </div>

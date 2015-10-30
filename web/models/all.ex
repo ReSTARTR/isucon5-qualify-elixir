@@ -7,8 +7,7 @@ defmodule Isucon5q.User do
     field :nick_name
     field :email
 
-    has_one :salt, Isucon5q.Salt, foreign_key: :user_id
-    has_one :profile, Isucon5q.Profile, foreign_key: :user_id
+    has_one :salt, Salt, foreign_key: :user_id
   end
 
   def get_by(user_id: id) do
@@ -38,9 +37,6 @@ defmodule Isucon5q.Relation do
     field :another, :integer
 
     timestamps inserted_at: :created_at, updated_at: nil
-
-    has_one :user_one, Isucon5q.User, references: :one, foreign_key: :id
-    has_one :user_another, Isucon5q.User, references: :another, foreign_key: :id
   end
 
   def changeset(model, params \\ :empty) do
@@ -105,8 +101,7 @@ defmodule Isucon5q.Profile do
     field :pref
 
     timestamps(inserted_at: nil, updated_at: :updated_at)
-
-    belongs_to :user, Isucon5q.User, references: :id, define_field: false
+    # field :updated_at, Ecto.DateTime
   end
 
   # ref: http://hexdocs.pm/ecto/Ecto.Changeset.html#cast/4
@@ -128,9 +123,6 @@ defmodule Isucon5q.Footprint do
     field :updated_at, Ecto.DateTime, virtual: true
 
     timestamps inserted_at: :created_at, updated_at: nil
-
-    has_one :user, Isucon5q.User, references: :user_id, foreign_key: :id
-    has_one :owner, Isucon5q.User, references: :owner_id, foreign_key: :id
   end
 
   # TODO:
@@ -180,9 +172,7 @@ defmodule Isucon5q.Entry do
 
     timestamps(inserted_at: :created_at, updated_at: nil)
 
-    belongs_to :user, Isucon5q.User, foreign_key: :user_id, define_field: false
-    has_many :comments, Isucon5q.Comment
-    has_many :comment_user, through: [:comments, :user]
+    # has_many :comments, Isucon5q.Comment, foreign_key: :entry_id, references: :id
   end
 
   def changeset(model, params \\ :empty) do
@@ -218,11 +208,9 @@ defmodule Isucon5q.Entry do
 
   # SELECT * FROM entries ORDER BY created_at DESC LIMIT 1000
   def user_friends(user_id: user_id) do
-    friend_ids = Isucon5q.Relation.friends(user_id: user_id)
-
     from(e in Isucon5q.Entry, order_by: [desc: :created_at], limit: 1000)
     |> Isucon5q.Repo.all
-    |> Isucon5q.Repo.filter_while(fn e -> user_id == e.user_id || Enum.member?(friend_ids, e.user_id) end, 10) # TODO: Is graph directed or undirected?
+    |> Isucon5q.Repo.filter_while(fn (e) -> Isucon5q.Relation.friendship(user_id, e.user_id) end, 10)
     |> Enum.to_list
   end
 end
@@ -237,9 +225,7 @@ defmodule Isucon5q.Comment do
 
     timestamps inserted_at: :created_at, updated_at: nil
 
-    belongs_to :entry, Isucon5q.Entry, define_field: false #foreign_key: :entry_id
-    has_one :user, Isucon5q.User, foreign_key: :id, references: :user_id
-    has_one :entry_user, through: [:entry, :user]
+    # belongs_to :entry, Isucon5q.Entry, define_field: false #foreign_key: :entry_id
   end
 
   def changeset(model, params \\ :empty) do
@@ -272,11 +258,9 @@ defmodule Isucon5q.Comment do
   end
 
   def user_friends(user_id: user_id) do
-    friend_ids = Isucon5q.Relation.friends(user_id: user_id)
-
     from(c in Isucon5q.Comment, order_by: [desc: :created_at], limit: 1000)
     |> Isucon5q.Repo.all
-    |> Isucon5q.Repo.filter_while(fn (c) -> user_id == c.user_id || Enum.member?(friend_ids, c.user_id) end, 10)
+    |> Isucon5q.Repo.filter_while(fn (c) -> Isucon5q.Relation.friendship(user_id, c.user_id) end, 10)
     |> Enum.to_list
   end
 
