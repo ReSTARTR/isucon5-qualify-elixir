@@ -31,7 +31,8 @@
     <div id="footprints">
       <ul class="list-group">
         <%= for footprint <- @footprints do %>
-          <li class="list-group-item footprints-footprint"><%= footprint.created_at %>: <a href="/profile/<%= footprint.user.account_name %>"><%= footprint.user.nick_name %>さん</a></li>
+          <% foot_user = user(footprint.user_id) %>
+          <li class="list-group-item footprints-footprint"><%= footprint.created_at %>: <a href="/profile/<%= foot_user.account_name %>"><%= foot_user.nick_name %>さん</a></li>
         <% end %>
       </ul>
     </div>
@@ -45,7 +46,8 @@
       <%= for comment <- @comments do %>
       <div class="comments-comment">
         <ul class="list-group">
-          <li class="list-group-item comment-owner"><a href="/profile/<%= comment.user.account_name %>"><%= comment.user.account_name %>さん</a>:</li>
+          <% comment_user = user(comment.user_id) %>
+          <li class="list-group-item comment-owner"><a href="/profile/<%= comment_user.account_name %>"><%= comment_user.account_name %>さん</a>:</li>
           <li class="list-group-item comment-comment"><%= comment_digest(comment.comment) %></li>
           <li class="list-group-item comment-created-at">投稿時刻:<%= comment.created_at %></li>
         </ul>
@@ -60,7 +62,8 @@
       <%= for entry <- @friend_entries do %>
       <div class="friend-entry">
         <ul class="list-group">
-          <li class="list-group-item entry-owner"><a href="/diary/entries/<%= entry.user.account_name %>"><%= entry.user.nick_name %>さん</a>:</li>
+          <% entry_owner = user(entry.user_id) %>
+          <li class="list-group-item entry-owner"><a href="/diary/entries/<%= entry_owner.account_name %>"><%= entry_owner.nick_name %>さん</a>:</li>
           <li class="list-group-item entry-title"><a href="/diary/entry/<%= entry.id %>"><%= entry_title(entry) %></a></li>
           <li class="list-group-item entry-created-at">投稿時刻:<%= entry.created_at %></li>
         </ul>
@@ -75,7 +78,10 @@
       <%= for comment <- @friend_comments do %>
       <div class="friend-comment">
         <ul class="list-group">
-          <li class="list-group-item comment-from-to"><a href="/profile/<%= comment.user.account_name %>"><%= comment.user.nick_name %>さん</a>から<a href="/profile/<%= comment.entry_user.account_name %>"><%= comment.entry_user.nick_name %>さん</a>へのコメント:</li>
+          <% comment_owner = user(comment.user_id) %>
+          <% comment_entry = entry(comment.entry_id) %>
+          <% entry_owner = user(comment_entry.user_id) %>
+          <li class="list-group-item comment-from-to"><a href="/profile/<%= comment_owner.account_name %>"><%= comment_owner.nick_name %>さん</a>から<a href="/profile/<%= entry_owner.account_name %>"><%= entry_owner.nick_name %>さん</a>へのコメント:</li>
           <li class="list-group-item comment-comment"><%= comment_digest(comment.comment) %></li>
           <li class="list-group-item comment-created-at">投稿時刻:<%= comment.created_at %></li>
         </ul>
